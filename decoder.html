@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chair/Table Morse Encoder & Decoder</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 30px;
+      background-color: #f0f0f0;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      font-family: monospace;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 15px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #outputEncoder, #outputDecoder {
+      white-space: pre-wrap;
+      background: #ffffff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      min-height: 100px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Chair/Table Morse Encoder & Decoder</h1>
+
+  <h2>Encoder</h2>
+  <p>Enter text (letters, numbers, and spaces only):</p>
+  <textarea id="inputTextEncoder" placeholder="HELLO WORLD"></textarea>
+  <br>
+  <button onclick="encode()">Encode</button>
+  <div id="outputEncoder"></div>
+
+  <hr>
+
+  <h2>Decoder</h2>
+  <p>Paste encoded chair/table message below:</p>
+  <textarea id="inputTextDecoder" placeholder="chair chair chair  table ..."></textarea>
+  <br>
+  <button onclick="decode()">Decode</button>
+  <div id="outputDecoder"></div>
+
+  <script>
+    // Morse dictionary
+    const morseDict = {
+      ".-": "A", "-...": "B", "-.-.": "C", "-..": "D",
+      ".": "E", "..-.": "F", "--.": "G", "....": "H",
+      "..": "I", ".---": "J", "-.-": "K", ".-..": "L",
+      "--": "M", "-.": "N", "---": "O", ".--.": "P",
+      "--.-": "Q", ".-.": "R", "...": "S", "-": "T",
+      "..-": "U", "...-": "V", ".--": "W", "-..-": "X",
+      "-.--": "Y", "--..": "Z",
+      "-----": "0", ".----": "1", "..---": "2", "...--": "3",
+      "....-": "4", ".....": "5", "-....": "6", "--...": "7",
+      "---..": "8", "----.": "9"
+    };
+
+    const reverseMorseDict = Object.fromEntries(
+      Object.entries(morseDict).map(([k, v]) => [v, k])
+    );
+
+    const DOT = "chair";
+    const DASH = "table";
+    const LETTER_GAP = "  "; // two spaces
+    const WORD_GAP = "    "; // four spaces
+
+    // Encode to chair/table
+    function encode() {
+      const input = document.getElementById("inputTextEncoder").value.toUpperCase().trim();
+      const words = input.split(" ");
+      const output = [];
+
+      for (let w = 0; w < words.length; w++) {
+        const word = words[w];
+        const encodedLetters = [];
+
+        for (let char of word) {
+          const morse = reverseMorseDict[char];
+          if (!morse) continue;
+
+          const encoded = morse.split('').map(s =>
+            s === '.' ? DOT : DASH
+          ).join(' '); // 1 space between symbols
+
+          encodedLetters.push(encoded);
+        }
+
+        output.push(encodedLetters.join(LETTER_GAP)); // 2 spaces between letters
+
+        if (w < words.length - 1) {
+          output.push(WORD_GAP); // 4 spaces between words
+        }
+      }
+
+      document.getElementById("outputEncoder").innerText = output.join('');
+    }
+
+    // Decode from chair/table
+    function decode() {
+      const input = document.getElementById("inputTextDecoder").value.trim();
+      const words = input.split(WORD_GAP);
+      const decodedWords = [];
+
+      for (let word of words) {
+        const letters = word.trim().split(LETTER_GAP);
+        let decodedWord = "";
+
+        for (let letter of letters) {
+          const symbols = letter.trim().split(/\s+/).map(token => {
+            if (token === DOT) return ".";
+            if (token === DASH) return "-";
+            return "";
+          });
+
+          const morse = symbols.join("");
+          decodedWord += morseDict[morse] || "?";
+        }
+
+        decodedWords.push(decodedWord);
+      }
+
+      document.getElementById("outputDecoder").innerText = decodedWords.join(" ");
+    }
+  </script>
+
+</body>
+</html>
